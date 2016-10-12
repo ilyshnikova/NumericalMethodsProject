@@ -1,0 +1,19 @@
+Source: nmp-system
+Section: nmp
+Priority: extra
+Maintainer: Anastasiya Tsarkova <nastats@yandex-team.ru>
+Build-Depends:
+	debhelper (>=7.0.50),
+Standards-Version: 0.0.1
+
+
+Package: nmp-system
+Architecture: any
+Section: nmp
+Priority: extra
+Depends:
+	python-flask,
+	${misc:Depends}
+Description: Alerts interface
+
+

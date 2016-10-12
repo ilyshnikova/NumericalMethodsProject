@@ -1,0 +1,17 @@
+<html>
+	<head>
+		<script src="/files/js/bootstrap.min.js"> </script>
+		<link rel="stylesheet" type="text/css" href="/files/css/bootstrap.min.css">
+	</head>
+	<body>
+		<center>
+
+			<div  class="input-group" role=group style="text-align:center; margin-top:15%">
+				{% for element in elements %}
+                <a href="{% if 'href' in element %} {{element.href}} {% else %}#{% endif %}" class="list-group-item {% if 'disabled' in element %} disabled {% endif %}">{{element.title.decode('utf-8')}}</a>
+				{% endfor %}
+			</div>
+		</center>
+	</body>
+</html>
+

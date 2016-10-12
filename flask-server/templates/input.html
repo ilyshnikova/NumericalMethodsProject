@@ -1,0 +1,24 @@
+<html>
+	<head>
+		<script src="/files/js/bootstrap.min.js"> </script>
+		<link rel="stylesheet" type="text/css" href="/files/css/bootstrap.min.css">
+	</head>
+	<body>
+        <center>
+            <form type=submit>
+                <div style="text-align:center; align:center;margin-top:15%; margin-left:25%; width=50%" class="col-lg-6">
+                    {% for element in elements %}
+                        <div class="input-group">
+                            <span class="input-group-addon"> {{element.title.decode('utf-8')}} </span>
+                            <input type="text" name={{element.id}} class="form-control" />
+                        </div>
+                    {% endfor %}
+                    <input type=hidden name=result value=1 />
+
+                    <button type="submit" class="btn btn-default">Отправить</button>
+                </div>
+            </form>
+		</center>
+	</body>
+</html>
+
