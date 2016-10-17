@@ -24,8 +24,8 @@ extern "C" {
 		return new CauchySolution();
 	}
 
-	CauchySolution CauchyProblem_Solve(CauchyProblem * self) {
-		return self->Solve();
+	CauchySolution* CauchyProblem_Solve(CauchyProblem * self) {
+		return new CauchySolution(self->Solve());
 	}
 
    	void CauchyProblem_Delete(const CauchyProblem& cauchy_problem) {

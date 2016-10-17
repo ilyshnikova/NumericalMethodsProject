@@ -87,7 +87,6 @@ def cauchy_problem_input():
         F.SetS(S.obj)
         F.SetZ(z.obj)
 
-        import pdb;pdb.set_trace();
         cauchy_problem = CauchyProblem(
             c_double(float(request.args.get('x0'))),
             c_double(float(request.args.get('y0'))),
@@ -100,7 +99,7 @@ def cauchy_problem_input():
         )
 
         solution = cauchy_problem.Solve()
-
+        return "Done"
     else:
         return render_template(
             "input.html",

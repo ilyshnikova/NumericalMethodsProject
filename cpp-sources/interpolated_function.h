@@ -13,7 +13,9 @@ public:
 		for (int i = 1; i < Coeffs.size(); ++i) {
 			Coeffs[i - 1] = Coeffs[i] * i;
 		}
-		Coeffs[Coeffs.size() - 1] = 0;
+		if (Coeffs.size() >= 1) {
+			Coeffs[Coeffs.size() - 1] = 0;
+		}
 		return *this;
 	}
 

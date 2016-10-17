@@ -61,7 +61,7 @@ public:
 		double prev_x = x0;
 		double prev_y = y0;
 
-		for (int t = 0; t <= T; t+=step) {
+		for (double t = 0; t <= T; t+=step) {
 			double cur_x = z.Diff().GetValue(t) * U.GetValue(prev_y);
 			double cur_y = f.GetValue(prev_x, t, 0) * step + prev_y;
 
