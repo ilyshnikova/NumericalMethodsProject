@@ -15,6 +15,14 @@ public:
 		: x()
 		, y()
 	{}
+
+	TabularFunction GetX() const {
+		return x;
+	}
+
+	TabularFunction	GetY() const {
+		return y;
+	}
 };
 
 

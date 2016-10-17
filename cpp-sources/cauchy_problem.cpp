@@ -24,15 +24,27 @@ extern "C" {
 		return new CauchySolution();
 	}
 
+	CauchySolution* CauchySolution_Copy(const CauchySolution& cauchy_solution) {
+		return new CauchySolution(cauchy_solution);
+	}
+
+	TabularFunction* CauchySolution_GetX(const CauchySolution& cauchy_solution) {
+		return new TabularFunction(cauchy_solution.GetX());
+	}
+
+	TabularFunction* CauchySolution_GetY(const CauchySolution& cauchy_solution) {
+		return new TabularFunction(cauchy_solution.GetY());
+	}
+
 	CauchySolution* CauchyProblem_Solve(CauchyProblem * self) {
 		return new CauchySolution(self->Solve());
 	}
 
-   	void CauchyProblem_Delete(const CauchyProblem& cauchy_problem) {
+	void CauchyProblem_Delete(const CauchyProblem& cauchy_problem) {
         	delete &cauchy_problem;
 	}
 
-	void CauchySolution_Delete(const CauchyProblem& cauchy_solution) {
+	void CauchySolution_Delete(const CauchySolution& cauchy_solution) {
         	delete &cauchy_solution;
 	}
 }

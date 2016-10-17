@@ -32,6 +32,10 @@ extern "C" {
         	delete &tabular_function;
 	}
 
+	TabularFunction * TabularFunction_Copy(const TabularFunction& tabular_function) {
+		return new TabularFunction(tabular_function);
+	}
+
 	TabularFunction::iterator* TabularFunctionIterator_New(const TabularFunction& tabular_function) {
         	return new TabularFunction::iterator(tabular_function.Begin());
    	}
