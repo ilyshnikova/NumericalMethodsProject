@@ -19,13 +19,17 @@ def method_wrapper(self_object, self_func):
     return method
 
 class BaseImport(object):
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         cls = type(self)
         type_name = cls.__name__
         self.lib = DLLLoader.get_lib(cls.SO_NAME)
 
-        self.obj = getattr(self.lib, "{type_name}_New".format(type_name = type_name))(*args)
+        if 'constructor' in kwargs:
+            constructor = kwargs['constructor']
+        else:
+            constructor = 'New'
 
+        self.obj = getattr(self.lib, "{type_name}_{constructor}".format(type_name = type_name, constructor=constructor))(*args)
 
         for class_with_method in getstatusoutput("nm -D " + cls.SO_NAME + "  | awk '{print $3}'  | grep -E '^" + type_name + "'")[1].split('\n'):
             if class_with_method[len(type_name)] == '_':

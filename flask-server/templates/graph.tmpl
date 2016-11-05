@@ -1,0 +1,19 @@
+<script type="text/javascript">
+	$(function () {
+		$('{{container}}').highcharts({
+			title : {
+				text: '{{title}}',
+			},
+			series: [
+				{
+					name: '{{title}}',
+					data: [
+						{% for point in data %}
+							[{{point[0]}}, {{point[1]}}],
+						{% endfor %}
+					],
+				},
+			],
+		});
+	});
+</script>

@@ -5,10 +5,19 @@ from modules.tabulator import Tabulator
 from modules.cauchy_problem import CauchyProblem, CauchySolution
 from modules.interpolated_function import PolynomialFunction
 from modules.functions import F1
+from modules.tabulator import TabularFunction
 from ctypes import c_double, c_bool
 import json
 
 app = Flask(__name__)
+
+def add_default_values(elements, request):
+    for element in elements:
+        value = request.args.get(element['id'])
+        if value:
+            element['default'] = value
+
+    return elements
 
 @app.route('/files/<path:path>')
 def send_file(path):
@@ -56,13 +65,50 @@ def main_menu():
             {
                 'title' : 'Интерполяция',
                 'disabled' : True,
-            }
+            },
+            {
+                'title' : 'Вернуться',
+                'href'  : '/',
+            },
         ],
     )
 
 
 @app.route('/test-modules/cauchy-problem')
 def cauchy_problem_input():
+    elements = [
+        {
+            'title' : 'x0',
+            'id' : 'x0',
+        },
+        {
+            'title' : 'y0',
+            'id' : 'y0',
+        },
+        {
+            'title' : 'T',
+            'id' : 'T',
+        },
+        {
+            'title' : 'betta',
+            'id' : 'betta',
+        },
+        {
+            'title' : 'U(y) polynom coeffs',
+            'id' : 'U',
+        },
+        {
+            'title' : 'S(t) polynom coeffs',
+            'id' : 'S',
+        },
+        {
+            'title' : 'z(y) polynom coeffs',
+            'id' : 'z',
+        },
+    ]
+    return_url="/test-modules"
+
+
     if request.args.get('result'):
         U = PolynomialFunction()
         coeff_index = 0
@@ -97,48 +143,48 @@ def cauchy_problem_input():
             z.obj,
             F.obj,
         )
-
-        solution = cauchy_problem.Solve()
-        return "Done"
+        variable = cauchy_problem.Solve()
+        solution = CauchySolution(variable, constructor='Copy')
+        solution = CauchySolution(cauchy_problem.Solve(), constructor='Copy')
+        solution_x_func = TabularFunction(solution.GetX(), constructor='Copy')
+        solution_y_func = TabularFunction(solution.GetY(), constructor='Copy')
+        tabulator = Tabulator()
+        return render_template(
+            "test-modules/cauchy_problem/output.html",
+            elements=add_default_values(elements, request),
+            x_data=tabulator.get_points(solution_x_func),
+            y_data=tabulator.get_points(solution_y_func),
+            return_url=return_url,
+        )
     else:
         return render_template(
             "input.html",
-            elements=[
-                {
-                    'title' : 'x0',
-                    'id' : 'x0',
-                },
-                {
-                    'title' : 'y0',
-                    'id' : 'y0',
-                },
-                {
-                    'title' : 'T',
-                    'id' : 'T',
-                },
-                {
-                    'title' : 'betta',
-                    'id' : 'betta',
-                },
-                {
-                    'title' : 'U(y) polynom coeffs',
-                    'id' : 'U',
-                },
-                {
-                    'title' : 'S(t) polynom coeffs',
-                    'id' : 'S',
-                },
-                {
-                    'title' : 'z(y) polynom coeffs',
-                    'id' : 'z',
-                },
-
-
-            ],
+            elements=elements,
+            return_url=return_url,
         )
+
 
 @app.route('/test-modules/tabulator')
 def tabulator_input():
+    elements = [
+        {
+            'title' : 'Выражение',
+            'id' : 'expression',
+        },
+        {
+            'title' : 'Начальная точка',
+            'id' : 'from_arg',
+        },
+        {
+            'title' : 'Конечная точка',
+            'id' : 'to_arg',
+        },
+        {
+            'title' : 'Шаг',
+            'id' : 'step',
+        },
+    ]
+    return_url="/test-modules"
     if request.args.get('result'):
         tabulator = Tabulator()
         tabular_function = tabulator.tabulting(
@@ -148,34 +194,17 @@ def tabulator_input():
             float(request.args.get('step')),
         )
         points = tabulator.get_points(tabular_function)
-        chart = {'type' : 'line', 'renderTo': "progresschart", "height": 400}
-        xAxis = {'title' : {'text': 'x'}}
-        yAxis ={'title' : {'text': 'x'}}
-        series = {'name': 'f(x)', 'data' : points}
-        title = {"text": 'Tabular Function'}
-#        return render_template('graph.html', chartID='tabular_function', chart=chart, series=series, title=title, xAxis=xAxis, yAxis=yAxis)
-        return json.dumps(points)
+        return render_template(
+            "test-modules/tabulator/output.html",
+            elements=add_default_values(elements, request),
+            data=points,
+            return_url=return_url,
+        )
     else:
         return render_template(
             "input.html",
-            elements=[
-                {
-                    'title' : 'Выражение',
-                    'id' : 'expression',
-                },
-                {
-                    'title' : 'Начальная точка',
-                    'id' : 'from_arg',
-                },
-                {
-                    'title' : 'Конечная точка',
-                    'id' : 'to_arg',
-                },
-                {
-                    'title' : 'Шаг',
-                    'id' : 'step',
-                },
-            ],
+            elements=elements,
+            return_url=return_url,
         )
 
 @app.route('/manual-mode')
