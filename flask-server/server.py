@@ -6,6 +6,7 @@ from modules.cauchy_problem import CauchyProblem, CauchySolution
 from modules.interpolated_function import PolynomialFunction
 from modules.functions import F1
 from modules.tabulator import TabularFunction
+from modules.integration import TabulateIntegration
 from ctypes import c_double, c_bool
 import json
 
@@ -56,7 +57,7 @@ def main_menu():
             },
             {
                 'title' : 'Интегрирование',
-                'disabled' : True,
+                'href' : '/test-modules/integration',
             },
             {
                 'title' : ' Решение задачи Коши',
@@ -73,6 +74,50 @@ def main_menu():
         ],
     )
 
+@app.route('/test-modules/integration')
+def intergate():
+    elements = [
+        {
+            'title': 'Выражение',
+            'id': 'expression',
+        },
+        {
+            'title': 'Начальная точка',
+            'id' : 'from_arg',
+        },
+        {
+            'title': 'Конечная точка',
+            'id': 'to_arg',
+        },
+        {
+            'title' : 'Шаг',
+            'id' : 'step',
+        },
+    ]
+    return_url="/test-modules"
+    if request.args.get('result'):
+        tabulator = Tabulator()
+        tabular_function = tabulator.tabulting(
+            request.args.get('expression'),
+            float(request.args.get('from_arg')),
+            float(request.args.get('to_arg')),
+            float(request.args.get('step')),
+        )
+        tabulate_integration = TabulateIntegration()
+        integrated_function = TabularFunction(tabulate_integration.Integrate(tabular_function.obj), constructor='Copy')
+        points = tabulator.get_points(integrated_function)
+        return render_template(
+            "test-modules/integration/output.html",
+            elements=add_default_values(elements, request),
+            data=points,
+            return_url=return_url,
+        )
+    else:
+        return render_template(
+            "input.html",
+            elements=elements,
+            return_url=return_url,
+        )
 
 @app.route('/test-modules/cauchy-problem')
 def cauchy_problem_input():
@@ -143,8 +188,6 @@ def cauchy_problem_input():
             z.obj,
             F.obj,
         )
-        variable = cauchy_problem.Solve()
-        solution = CauchySolution(variable, constructor='Copy')
         solution = CauchySolution(cauchy_problem.Solve(), constructor='Copy')
         solution_x_func = TabularFunction(solution.GetX(), constructor='Copy')
         solution_y_func = TabularFunction(solution.GetY(), constructor='Copy')
