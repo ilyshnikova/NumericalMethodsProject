@@ -7,6 +7,7 @@ from modules.interpolated_function import PolynomialFunction
 from modules.functions import F1
 from modules.tabulator import TabularFunction
 from modules.integration import TabulateIntegration
+from modules.interpolator import Interpolator
 from ctypes import c_double, c_bool
 import json
 
@@ -65,7 +66,7 @@ def main_menu():
             },
             {
                 'title' : 'Интерполяция',
-                'disabled' : True,
+                'href' : '/test-modules/interpolator',
             },
             {
                 'title' : 'Вернуться',
@@ -73,6 +74,57 @@ def main_menu():
             },
         ],
     )
+
+@app.route('/test-modules/interpolator')
+def interpolate():
+    elements = [
+        {
+            'title': 'Выражение',
+            'id': 'expression',
+        },
+        {
+            'title': 'Начальная точка',
+            'id' : 'from_arg',
+        },
+        {
+            'title': 'Конечная точка',
+            'id': 'to_arg',
+        },
+        {
+            'title' : 'Шаг табулированной функции',
+            'id' : 'step',
+        },
+        {
+            'title' : 'Шаг интерполированной функции',
+            'id' : 'precise_step',
+        },
+    ]
+    return_url="/test-modules"
+    if request.args.get('result'):
+        tabulator = Tabulator()
+        tabular_function = tabulator.tabulting(
+            request.args.get('expression'),
+            float(request.args.get('from_arg')),
+            float(request.args.get('to_arg')),
+            float(request.args.get('step')),
+        )
+        interpolator = Interpolator(c_double(float(request.args.get('precise_step'))))
+        integrated_function = TabularFunction(interpolator.Interpolate(tabular_function.obj), constructor='Copy')
+        points = tabulator.get_points(integrated_function)
+        return render_template(
+            "test-modules/interpolation/output.html",
+            elements=add_default_values(elements, request),
+            data=points,
+            return_url=return_url,
+        )
+
+    else:
+        return render_template(
+            "input.html",
+            elements=elements,
+            return_url=return_url,
+        )
+
 
 @app.route('/test-modules/integration')
 def intergate():
