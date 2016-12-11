@@ -108,8 +108,10 @@ def interpolate():
             float(request.args.get('to_arg')),
             float(request.args.get('step')),
         )
-        interpolator = Interpolator(c_double(float(request.args.get('precise_step'))))
-        integrated_function = TabularFunction(interpolator.Interpolate(tabular_function.obj), constructor='Copy')
+
+        interpolator = Interpolator(tabular_function.obj)
+        integrated_function = TabularFunction(interpolator.GetTabularFunction(c_double(float(request.args.get('precise_step')))), constructor='Copy')
+
         points = tabulator.get_points(integrated_function)
         return render_template(
             "test-modules/interpolation/output.html",
