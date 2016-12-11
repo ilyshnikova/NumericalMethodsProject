@@ -1,5 +1,14 @@
 <form type=submit>
 	<div style="text-align:center">
+		<div class="input-group">
+			<span class="input-group-addon"> Примеры </span>
+			<div class="btn-group input-group" role="group" >
+				{% for demo in demos %}
+					<a class="btn btn-default" href={{demo.link}}>{{demo.title.decode('utf-8')}}</a>
+				{% endfor %}
+			</div>
+		</div>
+		<br>
 		{% for element in elements %}
 			{% if element.type == "choice" %}
 				<div class="input-group">

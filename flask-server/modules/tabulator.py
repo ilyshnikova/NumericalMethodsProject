@@ -1,6 +1,6 @@
 from dll_importer import BaseImport
 from ctypes import c_double, c_bool
-import math
+from math import sin, cos, floor
 
 class TabularFunction(BaseImport):
     SO_NAME = '../cpp-sources/numerical_methods.so'
@@ -54,10 +54,10 @@ class CauchyFunctionTabulator(object):
                     tabular_cauchy_function.AddValueX(c_double(x), c_double(y), c_double(t), c_double(eval(expression_x)))
                     tabular_cauchy_function.AddValueY(c_double(x), c_double(y), c_double(t), c_double(eval(expression_y)))
                     y += t_step
-                    y = math.floor(y * 100) / 100
+                    y = floor(y * 100) / 100
                 x += t_step
-                x = math.floor(x * 100) / 100
+                x = floor(x * 100) / 100
             t += t_step
-            t = math.floor(t * 100) / 100
+            t = floor(t * 100) / 100
         return tabular_cauchy_function
 

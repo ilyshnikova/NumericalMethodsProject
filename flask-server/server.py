@@ -36,7 +36,6 @@ def ok():
                 'title' : 'Автоматический запуск',
             },
             {
-#                'disabled' : True,
                 'title' : 'Ручной запуск',
                 'href' : '/manual-mode'
             },
@@ -99,6 +98,16 @@ def interpolate():
             'id' : 'precise_step',
         },
     ]
+    demos = [
+        {
+            'title' : 'Полином 4-ой степени',
+            'link' : '/test-modules/interpolator?expression=x**4+-+3*x**2&from_arg=-3&to_arg=3&step=1&precise_step=0.1&result=1',
+        },
+        {
+            'title' : 'Осциллирующая функция',
+            'link' : '/test-modules/interpolator?expression=sin%281%2Fx%29&from_arg=0.01&to_arg=10&step=0.1&precise_step=0.01&result=1',
+        },
+    ]
     return_url="/test-modules"
     if request.args.get('result'):
         tabulator = Tabulator()
@@ -118,6 +127,7 @@ def interpolate():
             elements=add_default_values(elements, request),
             data=points,
             return_url=return_url,
+            demos=demos,
         )
 
     else:
@@ -125,6 +135,7 @@ def interpolate():
             "input.html",
             elements=elements,
             return_url=return_url,
+            demos=demos,
         )
 
 
@@ -148,6 +159,16 @@ def intergate():
             'id' : 'step',
         },
     ]
+    demos = [
+        {
+            'title' : 'Линейная функция',
+            'link' : '/test-modules/integration?expression=x&from_arg=-10&to_arg=10&step=0.1&result=1',
+        },
+        {
+            'title' : 'Квадратичная функция',
+            'link' : '/test-modules/integration?expression=x**2&from_arg=-10&to_arg=10&step=0.1&result=1',
+        },
+    ]
     return_url="/test-modules"
     if request.args.get('result'):
         tabulator = Tabulator()
@@ -165,12 +186,14 @@ def intergate():
             elements=add_default_values(elements, request),
             data=points,
             return_url=return_url,
+            demos=demos,
         )
     else:
         return render_template(
             "input.html",
             elements=elements,
             return_url=return_url,
+            demos=demos,
         )
 
 @app.route('/test-modules/cauchy-problem')
@@ -229,6 +252,16 @@ def cauchy_problem_input():
             'id' : 't_step',
         },
     ]
+    demos = [
+        {
+            'title' : 'Круговое решение',
+            'link' : '/test-modules/cauchy-problem?equation=CircleCauchyFunction&x0=0&y0=1&x_min=-2&x_max=2&y_min=-2&y_max=2&t_min=0&t_max=10&t_step=0.001&result=1',
+        },
+        {
+            'title' : 'Спиралевидное решение',
+            'link' : '/test-modules/cauchy-problem?equation=SpiralCauchyFunction&x0=0.01&y0=0&x_min=-2&x_max=2&y_min=-2&y_max=2&t_min=0&t_max=10&t_step=0.001&result=1',
+        },
+    ]
     return_url="/test-modules"
 
 
@@ -282,12 +315,14 @@ def cauchy_problem_input():
             y_max=float(request.args.get('y_max')),
             y_x_data=y_x_data,
             return_url=return_url,
+            demos=demos,
         )
     else:
         return render_template(
             "input.html",
             elements=elements,
             return_url=return_url,
+            demos=demos,
         )
 
 
@@ -311,6 +346,16 @@ def tabulator_input():
             'id' : 'step',
         },
     ]
+    demos = [
+        {
+            'title' : 'Квадратичная функция',
+            'link' : '/test-modules/tabulator?expression=x**2&from_arg=-10&to_arg=10&step=0.1&result=1',
+        },
+        {
+            'title' : 'Кубическая функция',
+            'link' : '/test-modules/tabulator?expression=x**3&from_arg=-10&to_arg=10&step=0.1&result=1',
+        },
+    ]
     return_url="/test-modules"
     if request.args.get('result'):
         tabulator = Tabulator()
@@ -326,12 +371,14 @@ def tabulator_input():
             elements=add_default_values(elements, request),
             data=points,
             return_url=return_url,
+            demos=demos,
         )
     else:
         return render_template(
             "input.html",
             elements=elements,
             return_url=return_url,
+            demos=demos,
         )
 
 @app.route('/manual-mode')
