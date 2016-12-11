@@ -9,5 +9,13 @@ class CauchySolution(BaseImport):
     SO_NAME = '../cpp-sources/numerical_methods.so'
     RETURN_TYPES = {}
 
+class CircleCauchyFunction(BaseImport):
+    SO_NAME = '../cpp-sources/numerical_methods.so'
+    RETURN_TYPES = {}
+
+class SpiralCauchyFunction(BaseImport):
+    SO_NAME = '../cpp-sources/numerical_methods.so'
+    RETURN_TYPES = {}
+
 
 

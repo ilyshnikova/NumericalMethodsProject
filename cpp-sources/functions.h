@@ -1,46 +1,35 @@
 #ifndef FUNCTION
 #define FUNCTION
+
+#include <map>
 #include "interpolated_function.h"
 
-class BaseThreeArumentFunction {
+class BaseCauchyFunction {
 public:
-	virtual double GetValue(const double first_arg, const double second_arg, const double third_arg);
+	virtual double GetValueX(const double x, const double y, const double t) const = 0;
+	virtual double GetValueY(const double x, const double y, const double t) const = 0;
 };
 
-class F1 {
+class TabularCauchyFunction : public BaseCauchyFunction {
 private:
-	double betta;
-	PolynomialFunction S;
-	PolynomialFunction z;
+	std::map<double, std::map<double, std::map<double, double> > > x_values;
+	std::map<double, std::map<double, std::map<double, double> > > y_values;
 public:
-	F1(double betta, const PolynomialFunction& S, const PolynomialFunction& z)
-		: betta(betta)
-		, S(S)
-		, z(z)
-	{}
+	void AddValueX(const double x, const double y, const double t, const double value);
+	void AddValueY(const double x, const double y, const double t, const double value);
 
-	F1()
-		: betta(0)
-		, S()
-		, z()
-	{}
+	double GetValueX(const double x, const double y, const double t) const;
+	double GetValueY(const double x, const double y, const double t) const;
+};
 
-	void SetBetta(double betta) {
-		betta = betta;
-	}
+class CircleCauchyFunction : public BaseCauchyFunction {
+	double GetValueX(const double x, const double y, const double t) const;
+	double GetValueY(const double x, const double y, const double t) const;
+};
 
-	void SetS(const PolynomialFunction& s) {
-		S = s;
-	}
-
-	void SetZ(const PolynomialFunction& _z) {
-		z = _z;
-	}
-
-	virtual double GetValue(const double first_arg, const double second_arg, const double third_arg=0) {
-		return betta * (first_arg - z.GetValue(second_arg));
-	}
-
+class SpiralCauchyFunction : public BaseCauchyFunction {
+	double GetValueX(const double x, const double y, const double t) const;
+	double GetValueY(const double x, const double y, const double t) const;
 };
 
 #endif

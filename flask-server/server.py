@@ -2,10 +2,10 @@
 
 from flask import Flask, send_from_directory, render_template, request
 from modules.tabulator import Tabulator
-from modules.cauchy_problem import CauchyProblem, CauchySolution
+from modules.cauchy_problem import CauchyProblem, CauchySolution, CircleCauchyFunction, SpiralCauchyFunction
 from modules.interpolated_function import PolynomialFunction
 from modules.functions import F1
-from modules.tabulator import TabularFunction
+from modules.tabulator import TabularFunction, CauchyFunctionTabulator
 from modules.integration import TabulateIntegration
 from modules.interpolator import Interpolator
 from ctypes import c_double, c_bool
@@ -177,6 +177,22 @@ def intergate():
 def cauchy_problem_input():
     elements = [
         {
+            'title': 'Equation',
+            'id': 'equation',
+            'type' : 'choice',
+            'options' : [
+                {
+                    'title' : 'D(x) = y, D(y) = -x',
+                    'id' : 'CircleCauchyFunction',
+                },
+                {
+                    'title' : 'D(x) = x + y, D(y) = y - 20 * x',
+                    'id' : 'SpiralCauchyFunction',
+                },
+            ],
+            'default': 'CircleCauchyFunction',
+        },
+        {
             'title' : 'x0',
             'id' : 'x0',
         },
@@ -185,72 +201,86 @@ def cauchy_problem_input():
             'id' : 'y0',
         },
         {
-            'title' : 'T',
-            'id' : 'T',
+            'title' : 'x_min',
+            'id' : 'x_min',
         },
         {
-            'title' : 'betta',
-            'id' : 'betta',
+            'title' : 'x_max',
+            'id' : 'x_max',
         },
         {
-            'title' : 'U(y) polynom coeffs',
-            'id' : 'U',
+            'title' : 'y_min',
+            'id' : 'y_min',
         },
         {
-            'title' : 'S(t) polynom coeffs',
-            'id' : 'S',
+            'title' : 'y_max',
+            'id' : 'y_max',
         },
         {
-            'title' : 'z(y) polynom coeffs',
-            'id' : 'z',
+            'title' : 't_min',
+            'id' : 't_min',
+        },
+        {
+            'title' : 't_max',
+            'id' : 't_max',
+        },
+        {
+            'title' : 't_step',
+            'id' : 't_step',
         },
     ]
     return_url="/test-modules"
 
 
     if request.args.get('result'):
-        U = PolynomialFunction()
-        coeff_index = 0
-        for i in request.args.get('U').split(','):
-            U.AddCoeff(coeff_index, c_double(float(i)))
-            coeff_index += 1
-
-        S = PolynomialFunction()
-        coeff_index = 0
-        for i in request.args.get('S').split(','):
-            S.AddCoeff(coeff_index, c_double(float(i)))
-            coeff_index += 1
-
-        z = PolynomialFunction()
-        coeff_index = 0
-        for i in request.args.get('z').split(','):
-            z.AddCoeff(coeff_index, c_double(float(i)))
-            coeff_index += 1
-
-        F = F1()
-        F.SetBetta(c_double(float(request.args.get('betta'))))
-        F.SetS(S.obj)
-        F.SetZ(z.obj)
+        cauchy_function = eval(request.args.get('equation'))()
 
         cauchy_problem = CauchyProblem(
             c_double(float(request.args.get('x0'))),
             c_double(float(request.args.get('y0'))),
-            c_double(float(request.args.get('betta'))),
-            c_double(float(request.args.get('T'))),
-            U.obj,
-            S.obj,
-            z.obj,
-            F.obj,
+            c_double(float(request.args.get('x_min'))),
+            c_double(float(request.args.get('x_max'))),
+            c_double(float(request.args.get('y_min'))),
+            c_double(float(request.args.get('y_max'))),
+            c_double(float(request.args.get('t_min'))),
+            c_double(float(request.args.get('t_max'))),
+            c_double(float(request.args.get('t_step'))),
+            cauchy_function.obj,
         )
+
         solution = CauchySolution(cauchy_problem.Solve(), constructor='Copy')
         solution_x_func = TabularFunction(solution.GetX(), constructor='Copy')
         solution_y_func = TabularFunction(solution.GetY(), constructor='Copy')
+
         tabulator = Tabulator()
+        x_points=tabulator.get_points(solution_x_func)
+        y_points=tabulator.get_points(solution_y_func)
+
+        y_x_dict = {}
+
+        for point in x_points:
+            t = point[0]
+            x = point[1]
+            y_x_dict.setdefault(t, {}).setdefault('x', x)
+
+        for point in y_points:
+            t = point[0]
+            y = point[1]
+            y_x_dict.setdefault(t, {}).setdefault('y', y)
+
+        y_x_data = []
+        for t in sorted(y_x_dict.keys()):
+            if 'x' in y_x_dict[t] and 'y' in y_x_dict[t]:
+                y_x_data.append((y_x_dict[t]['x'], y_x_dict[t]['y']))
+
         return render_template(
             "test-modules/cauchy_problem/output.html",
             elements=add_default_values(elements, request),
-            x_data=tabulator.get_points(solution_x_func),
-            y_data=tabulator.get_points(solution_y_func),
+            x_min=float(request.args.get('x_min')),
+            x_max=float(request.args.get('x_max')),
+            y_min=float(request.args.get('y_min')),
+            y_max=float(request.args.get('y_max')),
+            y_x_data=y_x_data,
             return_url=return_url,
         )
     else:
@@ -381,6 +411,7 @@ def functions_input():
 
 
 if __name__ == "__main__":
+    app.jinja_env.tests['equalto'] = lambda value, other : value == other
     app.run(
         host='::',
         port=5001,

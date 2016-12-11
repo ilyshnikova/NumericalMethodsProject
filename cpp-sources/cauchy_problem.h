@@ -16,71 +16,50 @@ public:
 		, y()
 	{}
 
-	TabularFunction GetX() const {
-		return x;
-	}
+	TabularFunction GetX() const;
 
-	TabularFunction	GetY() const {
-		return y;
-	}
+	TabularFunction	GetY() const;
 };
-
-
 
 class CauchyProblem {
 private:
 	double x0;
 	double y0;
-	double betta;
-	double T;
-	PolynomialFunction U;
-	PolynomialFunction S;
-	PolynomialFunction z;
-	F1 f;
+	double x_min;
+	double x_max;
+	double y_min;
+	double y_max;
+	double t_min;
+	double t_max;
+	double t_step;
+	BaseCauchyFunction * f;
 public:
 
 	CauchyProblem(
 		const double x0,
 		const double y0,
-		const double betta,
-		const double T,
-		const PolynomialFunction& U,
-		const PolynomialFunction& S,
-		const PolynomialFunction& z,
-		const F1& f2
+		const double x_min,
+		const double x_max,
+		const double y_min,
+		const double y_max,
+		const double t_min,
+		const double t_max,
+		const double t_step,
+		BaseCauchyFunction * f
 	)
-		: x0(x0)
-		, y0(y0)
-		, betta(betta)
-		, T(T)
-        , U(U)
-        , S(S)
-        , z(z)
-		, f(f2)
+	: x0(x0)
+	, y0(y0)
+	, x_min(x_min)
+	, x_max(x_max)
+	, y_min(y_min)
+	, y_max(y_max)
+	, t_min(t_min)
+	, t_max(t_max)
+	, t_step(t_step)
+	, f(f)
 	{}
 
-
-	CauchySolution Solve() {
-		double step = T / 1000.;
-		TabularFunction x, y;
-
-		x.AddValue(x0, 0);
-		y.AddValue(y0, 0);
-		double prev_x = x0;
-		double prev_y = y0;
-
-		for (double t = 0; t <= T; t+=step) {
-			double cur_x = z.Diff().GetValue(t) * U.GetValue(prev_y);
-			double cur_y = f.GetValue(prev_x, t, 0) * step + prev_y;
-
-			x.AddValue(cur_x, t);
-			y.AddValue(cur_y, t);
-
-			prev_x = cur_x;
-			prev_y = cur_y;
-		}
-		return CauchySolution(x, y);
-   	}
+	CauchySolution Solve() const;
 };
 
 

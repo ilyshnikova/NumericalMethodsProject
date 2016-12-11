@@ -1,10 +1,7 @@
 <html>
 	<head>
 		{% include "basic-js-imports.tmpl" %}
-		{% with container="#x_container", title="Функция x(t)", data=x_data %}
-			{% include "graph.tmpl" %}
-		{% endwith %}
-		{% with container="#y_container", title="Функция y(t)", data=y_data %}
+		{% with container="#y_container", title="Решение y(x)", data=y_x_data %}
 			{% include "graph.tmpl" %}
 		{% endwith %}
 	</head>
@@ -12,8 +9,6 @@
 		<center>
 			<div style="align:center;margin-top:5%; margin-left:25%; width=50%" class="col-lg-6" >
 				{% include "input.tmpl" %}
-			</div>
-			<div id=x_container style="align:center;margin-top:5%; margin-left:25%; width=50%" class="col-lg-6" >
 			</div>
 			<div id=y_container style="align:center;margin-top:5%; margin-left:25%; width=50%" class="col-lg-6" >
 			</div>
