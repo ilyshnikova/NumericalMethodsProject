@@ -44,6 +44,9 @@ public:
 		}
 
 
+		bool IsDefine() const {
+			return index < solution->size();
+		}
 
 	};
 

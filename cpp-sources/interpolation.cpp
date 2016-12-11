@@ -4,77 +4,100 @@
 #include "tabular_function.h"
 #include "interpolation.h"
 
-TabularFunction Interpolator::Interpolate(const TabularFunction& function) const {
+void Interpolator::Interpolate(const TabularFunction& function) {
 	TabularFunction::iterator tabular_function_iterator = function.Begin();
-	TabularFunction interpolated;
+
+	size_t n = function.Size();
+	if (n < 2) {
+		return;
+	} else {
+		--n;
+	}
+
+	LinearSystem linear_system;
+
+	std::vector<double> first_lin_eq(n + 1, 1);
+	for (size_t i = 1; i < n + 1; ++i) {
+		first_lin_eq[i] = 0;
+	}
+	linear_system.AddEquation(first_lin_eq, 0);
+
+	std::vector<double> second_lin_eq(n + 1, 0);
+	second_lin_eq[n] = 1;
+	linear_system.AddEquation(second_lin_eq, 0);
+
 	double prev_x = 0;
 	double prev_y = 0;
-	bool first_time = true;
+	size_t step_index = 0;
 	while (tabular_function_iterator.IsDefine()) {
 		double cur_x = tabular_function_iterator.GetX();
 		double cur_y = tabular_function_iterator.GetY();
-		if (!first_time) {
-			LinearSystem linear_system;
+		tabular_function_iterator.Next();
 
-			std::vector<double> left_part_1;
-			left_part_1.push_back(cur_x * cur_x * cur_x);
-		       	left_part_1.push_back(cur_x * cur_x);
-		       	left_part_1.push_back(cur_x);
-			left_part_1.push_back(1);
-			linear_system.AddEquation(left_part_1, cur_y);
+		if (step_index != 0 && tabular_function_iterator.IsDefine()) {
+			double post_x = tabular_function_iterator.GetX();
+			double post_y = tabular_function_iterator.GetY();
 
-			std::vector<double> left_part_2;
-			left_part_2.push_back(prev_x * prev_x * prev_x);
-		       	left_part_2.push_back(prev_x * prev_x);
-		       	left_part_2.push_back(prev_x);
-			left_part_2.push_back(1);
-			linear_system.AddEquation(left_part_2, prev_y);
+			double cur_h = cur_x - prev_x;
+			double post_h = post_x - cur_x;
 
-			std::vector<double> left_part_3;
-			left_part_3.push_back(3 * cur_x * cur_x);
-		       	left_part_3.push_back(2 * cur_x);
-		       	left_part_3.push_back(1);
-			left_part_3.push_back(0);
-			linear_system.AddEquation(left_part_3, 0);
+			std::vector<double> left_part(n + 1, 0);
+			left_part[step_index - 1] = cur_h;
+			left_part[step_index] = 2 * (cur_h + post_h);
+			left_part[step_index + 1] = post_h;
 
-			std::vector<double> left_part_4;
-			left_part_4.push_back(3 * prev_x * prev_x);
-		       	left_part_4.push_back(2 * prev_x);
-		       	left_part_4.push_back(1);
-			left_part_4.push_back(0);
-			linear_system.AddEquation(left_part_4, 0);
+			linear_system.AddEquation(left_part, 6 * ((post_y - cur_y) / post_h - (cur_y - prev_y) / cur_h));
+		}
+		prev_x = cur_x;
+		prev_y = cur_y;
+		++step_index;
+	}
 
-			LinearSystemSolution linear_system_solution = linear_system.Solve();
-			LinearSystemSolution::const_iterator linear_system_solution_iterator = linear_system_solution.begin();
+	LinearSystemSolution linear_system_solution = linear_system.Solve();
+	LinearSystemSolution::const_iterator linear_system_solution_iterator = linear_system_solution.begin();
+	tabular_function_iterator = function.Begin();
 
-			double a = *linear_system_solution_iterator++;
-			double b = *linear_system_solution_iterator++;
-			double c = *linear_system_solution_iterator++;
-			double d = *linear_system_solution_iterator++;
+	step_index = 0;
+	double prev_c = 0;
 
-			double x_coord = prev_x;
-			while (x_coord < cur_x) {
-				interpolated.AddValue(x_coord, a * x_coord * x_coord * x_coord + b * x_coord * x_coord + c * x_coord + d);
-				x_coord += precise_step;
-			}
+	while (
+		linear_system_solution_iterator.IsDefine() &&
+		tabular_function_iterator.IsDefine()
+	) {
+		double c = *linear_system_solution_iterator;
+		double cur_x = tabular_function_iterator.GetX();
+		double cur_y = tabular_function_iterator.GetY();
+		bounds.push_back(cur_x);
+		if (step_index != 0) {
+			double cur_h = cur_x - prev_x;
+			double a = cur_y;
+			double d = (c - prev_c) / cur_h;
+			double b = (cur_y - prev_y) / cur_h + cur_h * (2 * c + prev_c) / 6;
+			splines.push_back(CubeSpline(a, b, c, d, cur_x));
 
 		}
 		prev_x = cur_x;
 		prev_y = cur_y;
-		first_time = false;
-		tabular_function_iterator.Next();
-	}
+		prev_c = c;
 
-	return interpolated;
+		tabular_function_iterator.Next();
+		++linear_system_solution_iterator;
+		++step_index;
+	}
+}
+
+double Interpolator::GetValue(const double x) const {
+	double index = std::lower_bound(bounds.begin(), bounds.end(), x) - bounds.begin();
+	return splines[index].GetValue(x);
 }
 
 extern "C" {
-	Interpolator* Interpolator_New(const double precise_step) {
-		return new Interpolator(precise_step);
+	Interpolator* Interpolator_New(const TabularFunction& tabular_function) {
+		return new Interpolator(tabular_function);
 	}
 
-	TabularFunction* Interpolator_Interpolate(const Interpolator& self, const TabularFunction& tabular_function) {
-		return new TabularFunction(self.Interpolate(tabular_function));
+	TabularFunction* Interpolator_GetTabularFunction(const Interpolator& self, const double precise_step) {
+		return new TabularFunction(self.GetTabularFunction(precise_step));
 	}
 
 	void Interpolator_Delete(const Interpolator& self) {

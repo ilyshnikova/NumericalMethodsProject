@@ -46,14 +46,18 @@ public:
         return ValuesMapping;
     }
 
-	double GetValue(const double argument) const;
+    double GetValue(const double argument) const;
 
-	void AddValue(const double argument, const double value);
+    void AddValue(const double argument, const double value);
 
     typedef TabularFunctionConstIterator iterator;
 
     TabularFunctionConstIterator Begin() const {
         return TabularFunctionConstIterator(ValuesMapping.begin(), ValuesMapping.end());
+    }
+
+    size_t Size() const {
+    	return ValuesMapping.size();
     }
 };
 
