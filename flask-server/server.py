@@ -231,17 +231,7 @@ def cauchy_problem_input():
 
 
     if request.args.get('result'):
-        cauchy_function_tabulator = CauchyFunctionTabulator(
-            float(request.args.get('t_min')),
-            float(request.args.get('t_max')),
-            float(request.args.get('t_step')),
-            float(request.args.get('x_min')),
-            float(request.args.get('x_max')),
-            float(request.args.get('y_min')),
-            float(request.args.get('y_max')),
-        )
-        tabular_cauchy_function = eval(request.args.get('equation'))()
-        #cauchy_function_tabulator.tabulate(request.args.get('f_x'), request.args.get('f_y'))
+        cauchy_function = eval(request.args.get('equation'))()
 
         cauchy_problem = CauchyProblem(
             c_double(float(request.args.get('x0'))),
@@ -253,7 +243,7 @@ def cauchy_problem_input():
             c_double(float(request.args.get('t_min'))),
             c_double(float(request.args.get('t_max'))),
             c_double(float(request.args.get('t_step'))),
-            tabular_cauchy_function.obj,
+            cauchy_function.obj,
         )
 
         solution = CauchySolution(cauchy_problem.Solve(), constructor='Copy')
