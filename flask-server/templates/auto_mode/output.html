@@ -1,0 +1,18 @@
+<html>
+	<head>
+		{% include "basic-js-imports.tmpl" %}
+		{% with container="#S_x_container", title="S(x)", sets=S_x_sets %}
+			{% include "multi_graph.tmpl" %}
+		{% endwith %}
+	</head>
+	<body>
+		<center>
+			<div style="align:center;margin-top:5%; margin-left:25%; width=50%" class="col-lg-6" >
+				{% include "input.tmpl" %}
+			</div>
+			<div id=S_x_container style="align:center;margin-top:5%; margin-left:25%; width=50%" class="col-lg-6" >
+			</div>
+		</center>
+	</body>
+</html>
+
