@@ -439,7 +439,7 @@ def manual_mode():
     demos = [
         {
             'title' : 'Главный пример',
-            'link' : '/manual-mode?f=SimpleDiffAdFunction&rho_expression=6*x*%281+-+x%29&S_expression=3*x+%2B+sin%28x%29&z_expression=4*x+%2B+cos%28x%29&x0=0&y0=0&T=1&step=0.01&beta=0.01&result=1',
+            'link' : '/manual-mode?f=SimpleDiffAdFunction&rho_expression=6*x*%281+-+x%29&S_expression=3*x+%2B+sin%283*x%29&z_expression=4*x+%2B+cos%28x%29&x0=0&y0=0&T=1&step=0.01&beta=0.03&result=1',
         },
     ]
     return_url="/"
@@ -471,12 +471,15 @@ def manual_mode():
 
         c_1 = float(ad_server.C1())
         c_2 = float(ad_server.C2())
+        phi = float(ad_server.Phi())
 
         return render_template(
             "manual_mode/output.html",
             elements=add_default_values(elements, request),
             S_x_data=merge_functions(tabulator.get_points(S_tabular_function), tabulator.get_points(x_tabular_function)),
             y_data=tabulator.get_points(y_tabular_function),
+            x_data=tabulator.get_points(x_tabular_function),
+            S_data=tabulator.get_points(S_tabular_function),
             output_elements=[
                 {
                     'title' : 'C1',
@@ -485,6 +488,10 @@ def manual_mode():
                 {
                     'title' : 'C2',
                     'value' : c_2,
+                },
+                {
+                    'title' : 'Phi',
+                    'value' : phi,
                 },
             ],
             return_url=return_url,
@@ -553,7 +560,7 @@ def auto_mode():
     demos = [
         {
             'title' : 'Главный пример',
-            'link' : '/auto-mode?f=SimpleDiffAdFunction&rho_expression=6*x*%281+-+x%29&S_expression=3*x+%2B+sin%28x%29&z_expression=4*x+%2B+cos%28x%29&y0=0&T=1&step=0.1&beta_min=0.1&beta_max=1&beta_precision=0.1&result=1',
+            'link' : '/auto-mode?f=SimpleDiffAdFunction&rho_expression=6*x*%281+-+x%29&S_expression=3*x+%2B+sin%283*x%29&z_expression=4*x+%2B+cos%28x%29&y0=0&T=1&step=0.01&beta_min=0.01&beta_max=1&beta_precision=0.001&result=1',
         },
     ]
     return_url="/"
@@ -566,7 +573,7 @@ def auto_mode():
         S_tabular_function = tabulator.tabulting(request.args.get('S_expression'), 0, T, step)
         z_tabular_function = tabulator.tabulting(request.args.get('z_expression'), 0, T, step)
 
-        x0 = float(S_tabular_function.GetValue(0))
+        x0 = float(S_tabular_function.GetValue(c_double(0)))
         y0 = float(request.args.get('y0'))
 
         ad_server = AdServer(
@@ -591,25 +598,64 @@ def auto_mode():
 
         optimized_ad_server = AdServer(ad_server_auto_setup.GetAdServer(), constructor='Copy')
 
+        beta = float(optimized_ad_server.GetBeta())
+        c_1 = float(optimized_ad_server.C1())
+        c_2 = float(optimized_ad_server.C2())
+        phi = float(optimized_ad_server.Phi())
+
+        x_tabular_function = TabularFunction(optimized_ad_server.GetX(), constructor='Copy')
+        y_tabular_function = TabularFunction(optimized_ad_server.GetY(), constructor='Copy')
+
+        S_x_data = merge_functions(tabulator.get_points(S_tabular_function), tabulator.get_points(x_tabular_function))
+        y_data=tabulator.get_points(y_tabular_function)
+        x_data=tabulator.get_points(x_tabular_function)
+        S_data=tabulator.get_points(S_tabular_function)
+
+        print "Done optimizing server"
+
         S_x_sets = []
-        x0_new = x0 * 0.5
-        while x0_new < x0 * 2:
-            y0_new = y0 * 0.5
-            while y0_new < y0 * 2:
+        new_step = 0.2
+        x0_new = x0 - 3 * new_step
+        while x0_new < x0 + 3 * new_step:
+            y0_new = y0 - 3 * new_step
+            while y0_new < y0 + 3 * new_step:
                 optimized_ad_server.SetX0(c_double(x0_new))
                 optimized_ad_server.SetY0(c_double(y0_new))
+                optimized_ad_server.SolveCauchyProblem()
                 x_tabular_function = TabularFunction(optimized_ad_server.GetX(), constructor='Copy')
                 S_x_sets.append(
                     merge_functions(tabulator.get_points(S_tabular_function), tabulator.get_points(x_tabular_function))
                 )
-                y0_new += step
-            x0_new += step
+                y0_new += new_step
+            x0_new += new_step
 
 
         return render_template(
             "auto_mode/output.html",
             elements=add_default_values(elements, request),
+            S_x_data=S_x_data,
+            y_data=y_data,
+            x_data=x_data,
+            S_data=S_data,
             S_x_sets=S_x_sets,
+            output_elements=[
+                {
+                    'title' : 'beta',
+                    'value' : beta,
+                },
+                {
+                    'title' : 'C1',
+                    'value' : c_1,
+                },
+                {
+                    'title' : 'C2',
+                    'value' : c_2,
+                },
+                {
+                    'title' : 'Phi',
+                    'value' : phi,
+                },
+            ],
             return_url=return_url,
             demos=demos,
         )
@@ -631,5 +677,6 @@ if __name__ == "__main__":
         port=5001,
         use_reloader=False,
         debug=True,
+        threaded=False,
     )
 

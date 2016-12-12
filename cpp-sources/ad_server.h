@@ -11,6 +11,10 @@ public:
 		beta = new_beta;
 	}
 
+	virtual double GetBeta() const {
+		return beta;
+	}
+
 	virtual double GetValue(const double z, const double x, const double S) const = 0;
 };
 
@@ -41,6 +45,7 @@ public:
 	, f_beta(f_beta)
 	{}
 
+	double GetBeta() const;
 	double GetValueX(const double x, const double y, const double t) const;
 	double GetValueY(const double x, const double y, const double t) const;
 
@@ -82,12 +87,13 @@ public:
 	, integration()
 	, ad_cauchy_function(
 		Interpolator(z.Diff()),
-		Interpolator(integration.Integrate(rho).MultiplyBy(-1).MakeValueZero(1)),
+		Interpolator(integration.Integrate(rho).MultiplyBy(-1).MakeValueZero(1.)),
 		Interpolator(z),
 		Interpolator(S),
 		f_beta
 	)
-	{}
+	{
+	}
 
 
 	void SetBeta(const double beta);
@@ -99,6 +105,7 @@ public:
 	TabularFunction GetX() const;
 	TabularFunction GetY() const;
 
+	double GetBeta() const;
 	double C1() const;
 	double C2() const;
 	double Phi() const;

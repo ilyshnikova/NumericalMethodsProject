@@ -145,6 +145,16 @@ public:
 		}
 		return new_tabular_function;
 	}
+
+	void Print() const {
+		TabularFunction::iterator it = Begin();
+		while (it.IsDefine()) {
+			double x = it.GetX();
+			double y = it.GetY();
+			std::cout << "key = " << x << "value = " << y << std::endl;
+			it.Next();
+		}
+	}
 };
 
 

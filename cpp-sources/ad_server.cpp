@@ -6,6 +6,10 @@ double SimpleDiffAdFunction::GetValue(const double z, const double x, const doub
 	return beta * (S - x);
 }
 
+double AdCauchyFunction::GetBeta() const {
+	return f_beta->GetBeta();
+}
+
 double AdCauchyFunction::GetValueX(const double x, const double y, const double t) const {
 	return z_diff.GetValue(t) * U.GetValue(y);
 }
@@ -60,6 +64,10 @@ TabularFunction AdServer::GetY() const {
 	return y;
 }
 
+double AdServer::GetBeta() const {
+	return ad_cauchy_function.GetBeta();
+}
+
 double AdServer::C1() const {
 	TabulateIntegration integration;
 
@@ -110,9 +118,9 @@ void AdServerAutoSetup::SetupOptimalBeta() {
 		double second_phi = ad_server.Phi();
 
 		if (first_phi < second_phi) {
-			cur_beta_max = second_phi;
+			cur_beta_max = second_beta;
 		} else {
-			cur_beta_min = first_phi;
+			cur_beta_min = first_beta;
 		}
 	}
 
@@ -184,12 +192,26 @@ extern "C" {
 		self.SetBeta(beta);
 	}
 
+	void AdServer_SetX0(AdServer& self, const double x0) {
+		self.SetX0(x0);
+	}
+
+	void AdServer_SetY0(AdServer& self, const double y0) {
+		self.SetY0(y0);
+	}
+
+
+
 	void AdServer_SolveCauchyProblem(AdServer& self) {
 		self.SolveCauchyProblem();
 	}
 
 	AdServer* AdServer_Copy(const AdServer& self) {
 		return new AdServer(self);
+	}
+
+	double AdServer_GetBeta(const AdServer& self) {
+		return self.GetBeta();
 	}
 
 	void AdServer_Delete(const AdServer& self) {

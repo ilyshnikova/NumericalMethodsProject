@@ -4,22 +4,21 @@
 			title : {
 				text: '{{title}}',
 			},
-			xAxis: [{ min: {{x_min or 'undefined'}}, max: {{x_max or 'undefined'}},  gridLineWidth: 1, }],
+			xAxis: [{ min: 0, max: {{x_max or 'undefined'}},  gridLineWidth: 1, }],
 			yAxis: [{ min: {{y_min or 'undefined'}}, max: {{y_max or 'undefined'}}, }],
+			legend: {enabled: false},
 			series: [
-				{
-					name: '{{title}}',
-					data: [
-						{% for data in sets %}
-							[
+				{% for data in sets %}
+					{
+						name: '{{title}}',
+						data: [
+							{% for point in data %}
+								[{{point[0]}}, {{point[1]}}],
+							{% endfor %}
+						],
+					},
 
-								{% for point in data %}
-									[{{point[0]}}, {{point[1]}}],
-								{% endfor %}
-							],
-						{% endfor %}
-					],
-				},
+				{% endfor %}
 			],
 		});
 	});
