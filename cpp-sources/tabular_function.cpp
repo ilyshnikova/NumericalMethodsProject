@@ -7,7 +7,15 @@ TabularFunction::TabularFunction()
 {}
 
 double TabularFunction::GetValue(const double argument) const {
-	return ValuesMapping.lower_bound(argument)->second;
+	if (ValuesMapping.size() == 0) {
+		return 0;
+	} else {
+		std::map<double, double>::const_iterator lower_bound = ValuesMapping.lower_bound(argument);
+		if (lower_bound == ValuesMapping.end()) {
+			--lower_bound;
+		}
+		return lower_bound->second;
+	}
 }
 
 void TabularFunction::AddValue(const double argument, const double value) {

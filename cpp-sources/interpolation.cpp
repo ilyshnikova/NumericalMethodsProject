@@ -88,6 +88,9 @@ void Interpolator::Interpolate(const TabularFunction& function) {
 
 double Interpolator::GetValue(const double x) const {
 	double index = std::lower_bound(bounds.begin(), bounds.end(), x) - bounds.begin();
+	if (index >= splines.size()) {
+		--index;
+	}
 	return splines[index].GetValue(x);
 }
 
