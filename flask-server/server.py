@@ -624,7 +624,7 @@ def auto_mode():
                 optimized_ad_server.SolveCauchyProblem()
                 x_tabular_function = TabularFunction(optimized_ad_server.GetX(), constructor='Copy')
                 S_x_sets.append(
-                    merge_functions(tabulator.get_points(S_tabular_function), tabulator.get_points(x_tabular_function))
+                    (S, x) for (S, x) in merge_functions(tabulator.get_points(S_tabular_function), tabulator.get_points(x_tabular_function)) if S > 0 and x > 0
                 )
                 y0_new += new_step
             x0_new += new_step
