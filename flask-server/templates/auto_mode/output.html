@@ -13,7 +13,7 @@
 		{% with container="#S_container", title="S(t)", data=S_data %}
 			{% include "graph.tmpl" %}
 		{% endwith %}
-		{% with container="#S_x_multi_container", title="x(S) with another initial points", sets=S_x_sets %}
+		{% with container="#S_x_multi_container", title="x(S) with another initial points", sets=S_x_sets, y_min=0 %}
 			{% include "multi_graph.tmpl" %}
 		{% endwith %}
 	</head>
