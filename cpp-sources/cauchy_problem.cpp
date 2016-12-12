@@ -22,14 +22,16 @@ CauchySolution CauchyProblem::Solve() const{
 
 	double t_cur = t_min;
 	while (t_cur <= t_max) {
-		if (prev_x > x_max + t_step || prev_x < x_min - t_step || prev_y > y_max + t_step || prev_y < y_min - t_step) {
+		if (prev_x > x_max || prev_x < x_min || prev_y > y_max || prev_y < y_min) {
 			break;
 		} else {
 			double x_cur = prev_x + (t_cur - prev_t) * f->GetValueX(prev_x, prev_y, prev_t);
 			double y_cur = prev_y + (t_cur - prev_t) * f->GetValueY(prev_x, prev_y, prev_t);
 
-			x.AddValue(t_cur, x_cur);
-			y.AddValue(t_cur, y_cur);
+			if (x_cur <= x_max && x_cur >= x_min && y_cur <= y_max && y_cur >= y_min) {
+				x.AddValue(t_cur, x_cur);
+				y.AddValue(t_cur, y_cur);
+			}
 
 			prev_x = x_cur;
 			prev_y = y_cur;
